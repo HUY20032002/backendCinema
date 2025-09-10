@@ -1,0 +1,4 @@
+GET http://localhost:3000/auth/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTNhM2E1YzM2YmViMDRjY2I4ZDkxNyIsImVtYWlsIjoiMTIzQGdtYWlsLmNvbSIsImlhdCI6MTc1NTY0NTAxNiwiZXhwIjoxNzU1NjQ1MDQ2fQ.smq4ZU3dSgxMxy-J4XidSaMk2qh5xalLNwcS9H0oor4
+###
+POST http://localhost:3000/refreshtoken
