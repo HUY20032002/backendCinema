@@ -1,22 +1,31 @@
-const express = require('express')
-const dotenv = require('dotenv')
-dotenv.config() // hoặc viết gọn require('dotenv').config()
+const express = require("express");
+const dotenv = require("dotenv");
+dotenv.config(); // hoặc viết gọn require('dotenv').config()
+const cors = require("cors");
 
-const app = express()
-const port = process.env.PORT || 3000
-const routes = require('./routes')
-const morgan = require('morgan')
-const db = require('./config/db/index')
+const app = express();
+const port = process.env.PORT || 3000;
+const routes = require("./routes");
+const morgan = require("morgan");
+const db = require("./config/db/index");
 
 // Connect DB
-db.connect()
+db.connect();
+// Cho phép tất cả origins (dev)
+app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+app.use(morgan("dev"));
+app.use(express.json()); // đọc JSON từ body
+app.use(express.urlencoded({ extended: true })); // đọc form-urlencoded
 
-app.use(morgan('dev'))
-app.use(express.json()) // đọc JSON từ body
-app.use(express.urlencoded({ extended: true })) // đọc form-urlencoded
-
-routes(app)
+routes(app);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
