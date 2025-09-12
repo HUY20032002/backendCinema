@@ -23,20 +23,25 @@ class AuthController {
       if (!isMatch) {
         return res.status(401).json({ message: "Sai mật khẩu" });
       }
+
       // payload chỉ nên chứa thông tin cần thiết
       const payload = { id: user._id, email: user.email };
-      console.log("ACCESS_TOKEN_SECRET:", process.env.ACCESS_TOKEN_SECRET);
-      console.log("REFRESH_TOKEN_SECRET:", process.env.REFRESH_TOKEN_SECRET);
 
       const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "30s",
       });
 
       const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
-
       refreshTokens.push(refreshToken);
 
-      return res.status(200).json({ accessToken, refreshToken });
+      // loại bỏ password trước khi trả về
+      const { password: _, ...userData } = user.toObject();
+
+      return res.status(200).json({
+        accessToken,
+        refreshToken,
+        user: userData,
+      });
     } catch (error) {
       console.error(error);
       return res
