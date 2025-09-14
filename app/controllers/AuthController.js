@@ -4,37 +4,40 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// Lưu tạm refreshToken (thực tế nên lưu DB/Redis)
+// Lưu tạm refreshToken (sản phẩm thật nên lưu DB/Redis)
 let refreshTokens = [];
+
 class AuthController {
   // Đăng nhập
   async login(req, res) {
     try {
       const { email, password } = req.body;
 
-      // tìm user trong DB
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: "Email không tồn tại" });
       }
 
-      // kiểm tra mật khẩu
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ message: "Sai mật khẩu" });
       }
 
-      // payload chỉ nên chứa thông tin cần thiết
-      const payload = { id: user._id, email: user.email };
+      const payload = {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      };
 
       const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "30s",
+        expiresIn: "30s", // test
       });
 
-      const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
+      const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn: "30s", // refreshToken dài hạn
+      });
       refreshTokens.push(refreshToken);
 
-      // loại bỏ password trước khi trả về
       const { password: _, ...userData } = user.toObject();
 
       return res.status(200).json({
@@ -43,7 +46,6 @@ class AuthController {
         user: userData,
       });
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ message: "Lỗi server", error: error.message });
@@ -53,16 +55,24 @@ class AuthController {
   // Refresh Token
   async refreshToken(req, res) {
     const token = req.body.token;
-    if (!token) return res.sendStatus(401);
-    if (!refreshTokens.includes(token)) return res.sendStatus(403);
+    if (!token) return res.status(401).json({ message: "Chưa có token" });
+    if (!refreshTokens.includes(token))
+      return res.status(403).json({ message: "Refresh token không hợp lệ" });
 
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
-      if (err) return res.sendStatus(403);
+    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err)
+        return res.status(403).json({ message: "Refresh token hết hạn" });
 
-      // tạo access token mới
-      const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "15m",
+      const payload = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      };
+
+      const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "30s",
       });
+
       res.json({ accessToken });
     });
   }
@@ -72,8 +82,6 @@ class AuthController {
     try {
       const { name, password, phone, email, birth } = req.body;
 
-      // Kiểm tra email tồn tại
-      console.log(req.body);
       const checkUser = await User.findOne({ email });
       if (checkUser) {
         return res.status(400).json({ message: "Email đã tồn tại" });
@@ -89,15 +97,32 @@ class AuthController {
         birth,
       });
       await newUser.save();
+
       return res.status(200).json({ message: "Register success" });
     } catch (error) {
       return res.status(500).json({ message: "Register fail", error });
     }
   }
 
-  // Quên mật khẩu
+  // Logout
+  async logout(req, res) {
+    try {
+      const { token } = req.body;
+      if (!token) return res.status(400).json({ message: "Token required" });
+
+      // xoá refreshToken khỏi danh sách
+      refreshTokens = refreshTokens.filter((t) => t !== token);
+
+      return res.status(200).json({ message: "Logout thành công" });
+    } catch (error) {
+      return res.status(500).json({ message: "Logout fail", error });
+    }
+  }
+
+  // Quên mật khẩu (chưa làm)
   forget(req, res) {
     return res.status(400).json({ message: "Forget" });
   }
 }
+
 module.exports = new AuthController();
