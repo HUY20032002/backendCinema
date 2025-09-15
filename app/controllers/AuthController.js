@@ -34,15 +34,22 @@ class AuthController {
       });
 
       const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: "30s", // refreshToken dài hạn
+        expiresIn: "7d", // refresh token dài hạn hơn
       });
       refreshTokens.push(refreshToken);
+
+      // ⚡ Set refreshToken vào cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true, // chặn JS truy cập
+        secure: false, // true nếu dùng HTTPS
+        sameSite: "strict", // chống CSRF
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      });
 
       const { password: _, ...userData } = user.toObject();
 
       return res.status(200).json({
         accessToken,
-        refreshToken,
         user: userData,
       });
     } catch (error) {
@@ -54,7 +61,7 @@ class AuthController {
 
   // Refresh Token
   async refreshToken(req, res) {
-    const token = req.body.token;
+    const token = req.cookies.refreshToken; // ⚡ lấy từ cookie
     if (!token) return res.status(401).json({ message: "Chưa có token" });
     if (!refreshTokens.includes(token))
       return res.status(403).json({ message: "Refresh token không hợp lệ" });
@@ -107,12 +114,10 @@ class AuthController {
   // Logout
   async logout(req, res) {
     try {
-      const { token } = req.body;
+      const token = req.cookies.refreshToken;
       if (!token) return res.status(400).json({ message: "Token required" });
-
-      // xoá refreshToken khỏi danh sách
       refreshTokens = refreshTokens.filter((t) => t !== token);
-
+      res.clearCookie("refreshToken"); // ⚡ xóa cookie
       return res.status(200).json({ message: "Logout thành công" });
     } catch (error) {
       return res.status(500).json({ message: "Logout fail", error });
