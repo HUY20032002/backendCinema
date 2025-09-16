@@ -1,16 +1,30 @@
 // Danh sách phim
+const Movie = require("../../modal/Movie");
 class MoviesController {
-  async getMovies(req, res) {
-    return res.status(200).json({ message: "Get Movies" });
+  async createMovie(req, res) {
+    const {
+      name,
+      description,
+      genre,
+      duration,
+      // releaseDate,
+      // posterUrl,
+      // trailerUrl,
+      // status,
+    } = req.body;
+    let movie;
+    try {
+      movie = await Movie.create({ name, description, genre, duration });
+      return res.status(201).json({ SM: "Tạo phim thành công", DT: movie });
+    } catch (error) {
+      return res.status(500).json({ EM: error.message, DT: movie });
+    }
   }
   //   Chi tiet phim
   async getMovieId(req, res) {
     return res.status(200).json({ message: "Chi tiet phim" });
   }
-  //   Them phim moi
-  async createMovie(req, res) {
-    return res.status(200).json({ message: "Admin tao nguoi dung" });
-  }
+
   //   Sua thong tin phim
   async updateMovie(req, res) {
     return res.status(200).json({ message: "Admin sua thong tin phim" });
