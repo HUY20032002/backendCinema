@@ -20,6 +20,17 @@ class MoviesController {
       return res.status(500).json({ EM: error.message, DT: movie });
     }
   }
+  // Lay danh sach phim
+  async getAllMovies(req, res) {
+    try {
+      const movie = await Movie.find();
+      return res
+        .status(200)
+        .json({ SM: "Lấy danh sách phim thành công", DT: movie });
+    } catch (error) {
+      return res.status(500).json({ EM: error.message, DT: [] });
+    }
+  }
   //   Chi tiet phim
   async getMovieId(req, res) {
     return res.status(200).json({ message: "Chi tiet phim" });
