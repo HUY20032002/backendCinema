@@ -1,17 +1,12 @@
-const mongosse = require('mongoose')
-async function connect(){
+const mongoose = require("mongoose");
 
-try {
-    await mongosse.connect('mongodb://localhost:27017/Cinema',{
-        useNewUrlParser:true,
-        useUnifiedTopology:true
-    })
-    console.log("Connect successfully!!!!!!!")
-} catch (error) {
-    console.log("Connect fail!!!!!!!")
+async function connect() {
+  try {
+    await mongoose.connect("mongodb://localhost:27017/Cinema");
+    console.log("✅ Connect successfully!!!!!!!");
+  } catch (error) {
+    console.error("❌ Connect fail: ", error);
+  }
 }
 
-}
-
-
-module.exports = {connect};
+module.exports = { connect };

@@ -19,11 +19,12 @@ app.use(
     credentials: true, // ⚡ quan trọng
   })
 );
-
+// cho form
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(express.json()); // đọc JSON từ body
-app.use(express.urlencoded({ extended: true })); // đọc form-urlencoded
+// Tăng giới hạn dung lượng request body
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 routes(app);
 
