@@ -6,14 +6,14 @@ const MovieSchema = new mongoose.Schema(
     name: { type: String, required: true }, // Tên phim
     slug: { type: String, unique: true }, // slug tự tạo từ name
     description: { type: String }, // mô tả
+    genre: [{ type: String }],
     ageRating: { type: String }, // phân loại độ tuổi
-    genre: [{ type: String }], // thể loại phim
     duration: { type: Number }, // thời lượng phim (phút)
     releaseDate: { type: Date }, // ngày khởi chiếu
     bannerUrl: { type: String }, // ảnh bìa
     trailerUrl: { type: String }, // link trailer
-    subtitle: { type: Boolean, default: false }, // có phụ đề hay không
-    format: { type: String, enum: ["2D", "3D", "IMAX"], default: "2D" }, // định dạng
+    subtitle: [{ type: String }], // có phụ đề hay không
+    format: [{ type: String, enum: ["2D", "3D", "IMAX"] }],
     status: {
       type: String,
       enum: ["coming", "showing", "ended"],

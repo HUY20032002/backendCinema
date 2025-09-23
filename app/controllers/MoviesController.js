@@ -8,10 +8,11 @@ class MoviesController {
       description,
       genre,
       duration,
-      // releaseDate,
-      // posterUrl,
-      // trailerUrl,
-      // status,
+      releaseDate,
+      subtitle,
+      trailerUrl,
+      format,
+      ageRating, // phân loại độ tuổi
     } = req.body;
     let movie;
     try {
@@ -21,6 +22,12 @@ class MoviesController {
         description,
         genre,
         duration,
+        releaseDate,
+        trailerUrl,
+
+        subtitle,
+        format,
+        ageRating, // phân loại độ tuổi
       });
       return res.status(201).json({ SM: "Tạo phim thành công", DT: movie });
     } catch (error) {
@@ -29,13 +36,14 @@ class MoviesController {
   }
   // Lay danh sach phim
   async getAllMovies(req, res) {
+    let movie;
     try {
-      const movie = await Movie.find();
+      movie = await Movie.find();
       return res
         .status(200)
         .json({ SM: "Lấy danh sách phim thành công", DT: movie });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: [] });
+      return res.status(500).json({ EM: error.message, DT: movie });
     }
   }
   //   Chi tiet phim
@@ -46,11 +54,23 @@ class MoviesController {
   //   Sua thong tin phim
   async updateMovie(req, res) {
     try {
-      const movie = req.body;
-      const data = await Movie.updateOne({ movie });
-      return res.status(200).json({ SE: "Admin Sua Thong Tin Thanh Cong", DT });
-    } catch (error) {}
+      const { id } = req.params;
+      const data = req.body;
+
+      const movie = await Movie.findByIdAndUpdate(id, data, { new: true });
+
+      if (!movie) {
+        return res.status(404).json({ EM: "Không tìm thấy phim", DT: null });
+      }
+
+      return res
+        .status(200)
+        .json({ SM: "Cập nhật phim thành công", DT: movie });
+    } catch (error) {
+      return res.status(500).json({ EM: error.message, DT: null });
+    }
   }
+
   //   Xoa phim
   async deleteMovie(req, res) {
     return res.status(200).json({ message: "Admin xoa phim" });
