@@ -1,5 +1,6 @@
 // Danh sách phim
 const Movie = require("../../modal/Movie");
+const cron = require("node-cron");
 class MoviesController {
   async createMovie(req, res) {
     const {
@@ -34,18 +35,29 @@ class MoviesController {
       return res.status(500).json({ EM: error.message, DT: movie });
     }
   }
-  // Lay danh sach phim
+  // Lấy danh sách phim chưa xóa mềm
   async getAllMovies(req, res) {
-    let movie;
     try {
-      movie = await Movie.find();
+      const movies = await Movie.find({ isDeleted: false }); // filter điều kiện
       return res
         .status(200)
-        .json({ SM: "Lấy danh sách phim thành công", DT: movie });
+        .json({ SM: "Lấy danh sách phim thành công", DT: movies });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: movie });
+      return res.status(500).json({ EM: error.message, DT: [] });
     }
   }
+  // Lấy danh sách phim  xóa mềm
+  async getSoftAllMovies(req, res) {
+    try {
+      const movies = await Movie.find({ isDeleted: true }); // filter điều kiện
+      return res
+        .status(200)
+        .json({ SM: "Lấy danh sách phim thành công", DT: movies });
+    } catch (error) {
+      return res.status(500).json({ EM: error.message, DT: [] });
+    }
+  }
+
   //   Chi tiet phim
   async getMovieId(req, res) {
     return res.status(200).json({ message: "Chi tiet phim" });
@@ -72,8 +84,41 @@ class MoviesController {
   }
 
   //   Xoa phim
-  async deleteMovie(req, res) {
-    return res.status(200).json({ message: "Admin xoa phim" });
+  async deleteSoftMovie(req, res) {
+    const { id } = req.params; // ✅ lấy đúng id
+    console.log(id);
+    try {
+      await Movie.findByIdAndUpdate(id, { isDeleted: true });
+      res.status(200).json({ SM: "Admin Xoa Mem Thanh Cong" });
+    } catch (error) {
+      return res.status(404).json({ ER: "Admin xoa phim That Bai" });
+    }
   }
+  async deleteMovie(req, res) {
+    res.status(200).json({ SM: "Admin Xoa Mem Thanh Cong" });
+  }
+  // Job chạy hàng ngày lúc 00:00
+  startMovieCleanupJob = () => {
+    cron.schedule("0 0 * * *", async () => {
+      console.log("🔄 Running movie cleanup job...");
+
+      const now = new Date();
+
+      try {
+        // Điều kiện: releaseDate + 30 ngày < hôm nay
+        const moviesToDelete = await Movie.updateMany(
+          {
+            releaseDate: { $lte: new Date(now.setDate(now.getDate() - 30)) },
+            isDeleted: false,
+          },
+          { $set: { isDeleted: true } }
+        );
+
+        console.log(`✅ Movies soft deleted: ${moviesToDelete.modifiedCount}`);
+      } catch (error) {
+        console.error("❌ Error in movie cleanup job:", error);
+      }
+    });
+  };
 }
 module.exports = new MoviesController();
