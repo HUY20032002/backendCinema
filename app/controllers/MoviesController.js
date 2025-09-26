@@ -25,7 +25,6 @@ class MoviesController {
         duration,
         releaseDate,
         trailerUrl,
-
         subtitle,
         format,
         ageRating, // phân loại độ tuổi
