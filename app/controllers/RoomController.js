@@ -11,18 +11,19 @@ class RoomController {
       if (check) {
         return res
           .status(400)
-          .json({ ER: "Số phòng đã tồn tại trong rạp này" });
+          .json({ message: "Số phòng đã tồn tại trong rạp này" });
       }
 
       const room = await Room.create(data);
       return res.status(200).json({
-        SM: "Tạo Rạp thành công",
+        message: "Tạo Rạp thành công",
         DT: room,
       });
     } catch (error) {
       console.log(error);
       return res.status(500).json({
-        EM: "Tạo Rạp thất bại",
+        message: "Tạo Rạp thất bại",
+        EM: error.message,
         DT: [],
       });
     }
@@ -32,13 +33,14 @@ class RoomController {
     try {
       const room = await Room.find();
       return res.status(200).json({
-        SM: "Lấy Rạp thành công",
+        message: "Lấy Rạp thành công",
         DT: room,
       });
     } catch (error) {
       console.log(error);
       return res.status(500).json({
-        EM: "Lấy Rạp thất bại",
+        message: "Lấy Rạp thất bại",
+        EM: error.message,
         DT: [],
       });
     }

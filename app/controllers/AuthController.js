@@ -15,12 +15,12 @@ class AuthController {
 
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(401).json({ message: "Email không tồn tại" });
+        return res.status(401).json({ message: "Email does not exist" });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({ message: "Sai mật khẩu" });
+        return res.status(401).json({ message: "Wrong password" });
       }
 
       const payload = {
@@ -55,7 +55,7 @@ class AuthController {
     } catch (error) {
       return res
         .status(500)
-        .json({ message: "Lỗi server", error: error.message });
+        .json({ message: "Sever Error", ER: error.message });
     }
   }
 

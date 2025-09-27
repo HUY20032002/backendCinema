@@ -9,7 +9,7 @@ class CinemaController {
 
       if (!name || !address) {
         return res.status(400).json({
-          EM: "Thiếu thông tin name hoặc address",
+          message: "Missing name or address information",
           DT: [],
         });
       }
@@ -17,12 +17,12 @@ class CinemaController {
       const cinema = await Cinema.create({ name, address });
 
       return res.status(201).json({
-        SM: "Tạo rạp thành công",
+        message: "Create Cinema Success",
         DT: cinema,
       });
     } catch (error) {
-      console.error("Error creating cinema:", error);
       return res.status(500).json({
+        message: "Create Cinema Fail",
         EM: error.message,
         DT: [],
       });

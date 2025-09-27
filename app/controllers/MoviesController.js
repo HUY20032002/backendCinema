@@ -29,9 +29,15 @@ class MoviesController {
         format,
         ageRating, // phân loại độ tuổi
       });
-      return res.status(201).json({ SM: "Tạo phim thành công", DT: movie });
+      return res
+        .status(201)
+        .json({ message: "Create Movie Success", DT: movie });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: movie });
+      return res.status(500).json({
+        message: "Create Movie Fail",
+        EM: error.message,
+        DT: movie,
+      });
     }
   }
   // Lấy danh sách phim chưa xóa mềm
@@ -40,9 +46,11 @@ class MoviesController {
       const movies = await Movie.find({ isDeleted: false }); // filter điều kiện
       return res
         .status(200)
-        .json({ SM: "Lấy danh sách phim thành công", DT: movies });
+        .json({ message: "Get List Movie Success", DT: movies });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: [] });
+      return res
+        .status(500)
+        .json({ message: "Get List Movie Fail", EM: error.message, DT: [] });
     }
   }
   // Lấy danh sách phim  xóa mềm
@@ -51,15 +59,25 @@ class MoviesController {
       const movies = await Movie.find({ isDeleted: true }); // filter điều kiện
       return res
         .status(200)
-        .json({ SM: "Lấy danh sách phim thành công", DT: movies });
+        .json({ message: "Get List Movie Success", DT: movies });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: [] });
+      return res
+        .status(500)
+        .json({ message: "Get List Movie Fail", EM: error.message, DT: [] });
     }
   }
 
   //   Chi tiet phim
   async getMovieId(req, res) {
-    return res.status(200).json({ message: "Chi tiet phim" });
+    try {
+      const { id } = req.params;
+      const data = await Movie.findById({ _id: id });
+      return res.status(200).json({ message: "Get Movie Success", DT: data });
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ message: "Get Movie Success", ER: error.message, DT: data });
+    }
   }
 
   //   Sua thong tin phim
@@ -71,14 +89,16 @@ class MoviesController {
       const movie = await Movie.findByIdAndUpdate(id, data, { new: true });
 
       if (!movie) {
-        return res.status(404).json({ EM: "Không tìm thấy phim", DT: null });
+        return res.status(404).json({ message: "not Found", DT: null });
       }
 
       return res
         .status(200)
-        .json({ SM: "Cập nhật phim thành công", DT: movie });
+        .json({ message: "Update Movie Success", DT: movie });
     } catch (error) {
-      return res.status(500).json({ EM: error.message, DT: null });
+      return res
+        .status(500)
+        .json({ message: "Update Movie Fail", EM: error.message, DT: null });
     }
   }
 
@@ -88,13 +108,15 @@ class MoviesController {
     console.log(id);
     try {
       await Movie.findByIdAndUpdate(id, { isDeleted: true });
-      res.status(200).json({ SM: "Admin Xoa Mem Thanh Cong" });
+      res.status(200).json({ message: "Admin Xoa Mem Thanh Cong" });
     } catch (error) {
-      return res.status(404).json({ ER: "Admin xoa phim That Bai" });
+      return res
+        .status(404)
+        .json({ message: "Admin xoa phim That Bai", EM: error.message });
     }
   }
   async deleteMovie(req, res) {
-    res.status(200).json({ SM: "Admin Xoa Mem Thanh Cong" });
+    res.status(200).json({ message: "Admin Xoa Mem Thanh Cong" });
   }
   // Job chạy hàng ngày lúc 00:00
   startMovieCleanupJob = () => {
