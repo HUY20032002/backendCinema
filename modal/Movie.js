@@ -3,39 +3,38 @@ const slugify = require("slugify");
 
 const MovieSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // Tên phim
-    slug: { type: String, unique: true }, // slug tự tạo từ name
-    description: { type: String }, // mô tả
+    name: { type: String, required: true },
+    slug: { type: String, unique: true },
+    description: { type: String },
     genre: [{ type: String }],
-    ageRating: { type: String }, // phân loại độ tuổi
-    duration: { type: Number }, // thời lượng phim (phút)
-    releaseDate: { type: Date }, // ngày khởi chiếu
-    bannerUrl: { type: String }, // ảnh bìa
-    trailerUrl: { type: String }, // link trailer
-    subtitle: [{ type: String }], // có phụ đề hay không
+    ageRating: { type: String },
+    duration: { type: Number },
+    releaseDate: { type: Date },
+    bannerUrl: { type: String },
+    trailerUrl: { type: String },
+    subtitle: [{ type: String }],
     format: [{ type: String, enum: ["2D", "3D", "IMAX"] }],
     status: {
       type: String,
       enum: ["coming", "showing", "ended"],
       default: "coming",
-    }, // trạng thái: sắp chiếu, đang chiếu, ngừng chiếu
-    ratingAvg: { type: Number, min: 0, max: 10, default: 0 }, // điểm đánh giá trung bình
-    ratingCount: { type: Number, default: 0 }, // số lượng đánh giá
-    isDeleted: { type: Boolean, default: false }, // xóa mềm
-    deletedAt: { type: Date, default: null }, // thời gian xóa
+    },
+    ratingAvg: { type: Number, min: 0, max: 10, default: 0 },
+    ratingCount: { type: Number, default: 0 },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
 
-// 🔥 Tự động tạo slug từ name
 MovieSchema.pre("save", function (next) {
   if (this.isModified("name")) {
     this.slug = slugify(this.name, {
-      lower: true, // chữ thường hết
-      strict: true, // loại bỏ ký tự đặc biệt
+      lower: true,
+      strict: true,
     });
   }
   next();
 });
 
-module.exports = mongoose.model("Movie", MovieSchema);
+module.exports = mongoose.models.Movie || mongoose.model("Movie", MovieSchema);

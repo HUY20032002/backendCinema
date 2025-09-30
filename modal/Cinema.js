@@ -1,4 +1,4 @@
-const mongoose = require("mongoose"); // 👈 thêm dòng này
+const mongoose = require("mongoose");
 
 const CinemaSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -6,4 +6,5 @@ const CinemaSchema = new mongoose.Schema({
   address: { type: String, required: true },
 });
 
-module.exports = mongoose.model("Cinema", CinemaSchema);
+module.exports =
+  mongoose.models.Cinema || mongoose.model("Cinema", CinemaSchema);

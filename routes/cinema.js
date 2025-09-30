@@ -3,4 +3,5 @@ const router = express.Router();
 const cinemaController = require("../app/controllers/CinemaControlller");
 router.post("/", cinemaController.createCinema);
 router.get("/", cinemaController.getAllCinema);
+router.get("/:id", cinemaController.getCinema);
 module.exports = router;

@@ -46,6 +46,25 @@ class CinemaController {
       });
     }
   }
+  // Lấy 1 rạp
+  async getCinema(req, res) {
+    try {
+      const { id } = req.params;
+      const cinemas = await Cinema.findById({ _id: id });
+
+      return res.status(200).json({
+        message: "Lấy  rạp thành công",
+        DT: cinemas,
+      });
+    } catch (error) {
+      console.error("Error fetching cinemas:", error);
+      return res.status(500).json({
+        EM: error.message,
+        message: "Lấy  rạp thất bại",
+        DT: [],
+      });
+    }
+  }
 }
 
 module.exports = new CinemaController();
